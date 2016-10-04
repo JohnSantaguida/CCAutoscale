@@ -22,6 +22,7 @@ import json
 
 #server create module 
 from nova_server_create import create
+import subprocess as sp
 
 
 # print the response (for debugging purposes)
@@ -69,9 +70,20 @@ def send_req (conn, arg):
 # dispatch policy along with the ratio in which subsequent requests are
 # going to be handled 
 def main ():
-    ip = "129.59.107.47"
-    print "floating ip is " + ip
+    #Specify the Floating IP for accessing the 2nd tier VM 
+    FINAL_FLOATING_IP = "129.59.107.47"
+    print "floating ip is " + FINAL_FLOATING_IP
     print "Instantiating a connection obj"
+    #This block creates the 2nd tier VM and the first 3rd tier VM
+    name = 'jspm_tier2'
+    print "creating server: " + name
+    create(name, FINAL_FLOATING_IP)
+    print name + " created"
+    name = 'jspm_tier3_1'
+    print "creating server: " + name
+    TIER_3_1_IP_ADDRESS = create(name)
+    print name + " created"  
+    print "Tier 3 IP address: " + str(TIER_3_1_IP_ADDRESS)
     try:
         # @@@ NOTE @@@
         # if you are trying this locally, use this and by using
@@ -82,25 +94,21 @@ def main ():
         # if you try this to talk to your server which has a floating IP, 
         # then you use the following and parametrize it with the
         # actual floating IP
-        conn = httplib.HTTPConnection (ip, "8080")
+        conn = httplib.HTTPConnection (FINAL_FLOATING_IP, "8080")
     except:
         print "Exception thrown: ", sys.exc_info()[0]
         raise
-
-    name = 'jspm_tier2'
-    print "creating server: " + name
-    create(name, ip)
-    print name + " created"
-    #EXECUTE NECESSARY REMOTE COMMANDS 
     
+    #EXECUTE NECESSARY REMOTE COMMANDS - DOES NOT WORK
+    args = 'ssh -i /home/cloud/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get install python-dev python-pip'
 
-    name = 'jspm_tier3_1'
-    print "creating server: " + name
-    TIER_3_1_IP_ADDRESS = create(name)
-    print name + " created"  
-    print "Tier 3 IP address: " + str(TIER3_IP_ADDRESS)
-
-    
+    try:
+        p = sp.Popen (args, shell=True)
+        retcode = p.wait ()
+        print 'Subprocess exited with status: ', retcode
+    except:
+        print "Exception thrown: ", sys.exc_info()[0]
+        raise
     # @@@ NOTE @@@
     # In your code, you should first start the main client-facing server on the
     # horizon cloud. See my sample code nova_server_create.py on how to do
