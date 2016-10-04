@@ -126,7 +126,7 @@ def assign_floating_ip (server, ip):
     return server
 
 # main
-def create (name, ip):
+def create (name, ip=""):
     
     # get our credentials for version 2 of novaclient
     creds = get_nova_creds()
@@ -136,10 +136,12 @@ def create (name, ip):
 
     # create server
     server = create_server (name, nova)
-
+	
     # assign floating IP
-    assign_floating_ip (server, ip)
-
+    if ip != "":
+	assign_floating_ip (server, ip)
+    else:
+	return server.networks.get('internal network')[0]
     
 # invoke main
 if __name__ == "__main__":

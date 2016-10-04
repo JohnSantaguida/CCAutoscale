@@ -24,8 +24,6 @@ import json
 from nova_server_create import create
 
 
-
-
 # print the response (for debugging purposes)
 def print_response (resp):
     print "printing response headers"
@@ -93,7 +91,15 @@ def main ():
     print "creating server: " + name
     create(name, ip)
     print name + " created"
+    #EXECUTE NECESSARY REMOTE COMMANDS 
     
+
+    name = 'jspm_tier3_1'
+    print "creating server: " + name
+    TIER_3_1_IP_ADDRESS = create(name)
+    print name + " created"  
+    print "Tier 3 IP address: " + str(TIER3_IP_ADDRESS)
+
     
     # @@@ NOTE @@@
     # In your code, you should first start the main client-facing server on the
