@@ -70,6 +70,7 @@ def send_req (conn, arg):
 # dispatch policy along with the ratio in which subsequent requests are
 # going to be handled 
 def main ():
+   
     #Specify the Floating IP for accessing the 2nd tier VM 
     FINAL_FLOATING_IP = "129.59.107.47"
     print "floating ip is " + FINAL_FLOATING_IP
@@ -100,7 +101,7 @@ def main ():
         raise
     
     #EXECUTE NECESSARY REMOTE COMMANDS - DOES NOT WORK
-    args = 'ssh -i /home/cloud/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get install python-dev python-pip'
+    args = 'ssh -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get install python-dev python-pip ' + 
 
     try:
         p = sp.Popen (args, shell=True)
