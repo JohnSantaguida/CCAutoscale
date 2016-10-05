@@ -101,7 +101,7 @@ def main ():
         raise
     
     #EXECUTE NECESSARY REMOTE COMMANDS - DOES NOT WORK
-    args = 'ssh -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get install python-dev python-pip ' + 
+    args = 'ssh -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get install python-dev python-pip '
 
     try:
         p = sp.Popen (args, shell=True)
