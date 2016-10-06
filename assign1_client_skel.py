@@ -23,6 +23,16 @@ import json
 #server create module 
 from nova_server_create import create
 import subprocess as sp
+	
+
+def remote_cmd(args):
+    try:
+        p = sp.Popen (args, shell=True)
+        retcode = p.wait ()
+        print 'Subprocess exited with status: ', retcode
+    except:
+        print "Exception thrown: ", sys.exc_info()[0]
+        raise
 
 
 # print the response (for debugging purposes)
@@ -82,9 +92,9 @@ def main ():
     print name + " created"
     name = 'jspm_tier3_1'
     print "creating server: " + name
-    TIER_3_1_IP_ADDRESS = create(name)
+    TIER_3_1_IP = create(name)
     print name + " created"  
-    print "Tier 3 IP address: " + str(TIER_3_1_IP_ADDRESS)
+    print "Tier 3 IP address: " + str(TIER_3_1_IP)
     try:
         # @@@ NOTE @@@
         # if you are trying this locally, use this and by using
@@ -100,16 +110,63 @@ def main ():
         print "Exception thrown: ", sys.exc_info()[0]
         raise
     
-    #EXECUTE NECESSARY REMOTE COMMANDS - DOES NOT WORK
-    args = 'ssh -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get install python-dev python-pip '
+#Set up tier 2 VM
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get -y update' 
+    remote_cmd(args)
 
-    try:
-        p = sp.Popen (args, shell=True)
-        retcode = p.wait ()
-        print 'Subprocess exited with status: ', retcode
-    except:
-        print "Exception thrown: ", sys.exc_info()[0]
-        raise
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get -y install python-dev python-pip' 
+    remote_cmd(args)
+ 
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo python -m pip install flask'
+    remote_cmd(args)
+	
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_relay_server.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    remote_cmd(args)
+
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    remote_cmd(args)
+
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_server_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    remote_cmd(args)
+
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_client_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    remote_cmd(args)
+
+#Setup tier 3 VM
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo apt-get -y update'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo apt-get -y install python-dev python-pip'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo python -m pip install flask'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo python -m pip install numpy'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/assign1_server_skel.py ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
+    remote_cmd(args)
+
+
+    
+#NEED LOOKBUSY
+
+#Start Both Flask Apps
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
+    sp.Popen (args, shell=True)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' env FLASK_APP=assign1_relay_server.py python -m flask run --host=0.0.0.0 --port=8080'
+    sp.Popen (args, shell=True)
+
+    time.sleep(30)#MAYBE NO THERE
+
+
+
+
     # @@@ NOTE @@@
     # In your code, you should first start the main client-facing server on the
     # horizon cloud. See my sample code nova_server_create.py on how to do
