@@ -38,9 +38,15 @@ app = Flask (__name__)
 # initialize it to the right connection we want. So for now
 # the connection is established here. Change it to the IP addr of
 # the 3rd tier VM.
+f2 = open('file2.txt')
+IP2 = f2.read()
+conn2 = httplib.HTTPConnection (IP2, "8080")
+
 f = open('file.txt')
 IP = f.read()
 conn = httplib.HTTPConnection (IP, "8080")
+
+
 
 # print the response (for debugging purposes only)
 def print_response (resp):

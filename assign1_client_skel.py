@@ -84,7 +84,7 @@ def main ():
     FINAL_FLOATING_IP = "129.59.107.47"
     print "floating ip is " + FINAL_FLOATING_IP
     print "Instantiating a connection obj"
-    '''#This block creates the 2nd tier VM and the first 3rd tier VM
+    #This block creates the 2nd tier VM and the first 3rd tier VM
     name = 'jspm_tier2'
     print "creating server: " + name
     create(name, FINAL_FLOATING_IP)
@@ -97,8 +97,8 @@ def main ():
     f.write(TIER_3_1_IP)
     f.close()
 
-    print name + " created"'''  
-    print "Tier 3 IP address: " + str("10.10.15.167")#TIER_3_1_IP) - hardcode for debugging
+    print name + " created"
+    print "Tier 3 IP address: " + str(TIER_3_1_IP) #- hardcode for debugging
     try:
         # @@@ NOTE @@@
         # if you are trying this locally, use this and by using
@@ -113,7 +113,7 @@ def main ():
     except:
         print "Exception thrown: ", sys.exc_info()[0]
         raise
-    '''    #Set up tier 2 VM
+      #Set up tier 2 VM
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get -y update' 
     remote_cmd(args)
 
@@ -152,14 +152,10 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo apt-get install stress'
     remote_cmd(args)
 
-    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
-    remote_cmd(args)
-
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/assign1_server_skel.py ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
     remote_cmd(args)
 
-'''#NEED LOOKBUSY Start Both Flask Apps
-    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str("10.10.15.167") + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'#TIER_3_1_IP) - hardcode for debugging
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
     sp.Popen (args, shell=True)
 
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' env FLASK_APP=assign1_relay_server.py python -m flask run --host=0.0.0.0 --port=8080'
@@ -167,6 +163,36 @@ def main ():
 
 #    time.sleep(30)#MAYBE NO THERE
 
+    name = 'jspm_tier3_2'
+    print "creating server: " + name
+    TIER_3_2_IP = create(name)
+
+    f2 = open( 'file2.txt', 'w' )
+    f2.write(TIER_3_2_IP)
+    f2.close()
+
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/file2.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    remote_cmd(args)
+    print name + " created" 
+    print "Tier 3 second IP address: " + str(TIER_3_2_IP) # - hardcode for debugging
+    #Setup tier 3 VM
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_2_IP) + ' sudo apt-get -y update'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_2_IP) + ' sudo apt-get -y install python-dev python-pip'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_2_IP) + ' sudo python -m pip install flask'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_2_IP) + ' sudo python -m pip install numpy'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/assign1_server_skel.py ubuntu@' + str(TIER_3_2_IP) + ':/home/ubuntu'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_2_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
+    sp.Popen (args, shell=True)
 
 
 
@@ -187,27 +213,26 @@ def main ():
     # first make a request to the top level page
     print "Sending request for top level page"
     send_req (conn, "/")
-
     # send the dummy request which takes some time to execute
-    print "Sending request for the dummy op 100 times"
-    print "Server Time     Relay Time    Client Time"
-    for i in range (1, 100):
+#    print "Sending request for the dummy op 100 times"
+#    print "Server Time     Relay Time    Client Time"
+#    for i in range (1, 100):
 
         # start timer
-        start_time = time.time ()
+#        start_time = time.time ()
         
         # send dummy request
-        resp = send_req (conn, "/dummy_op")
+#        resp = send_req (conn, "/dummy_op")
 
         # end timer
-        end_time = time.time ()
+#        end_time = time.time ()
         
         # recall that we will get a jsonified info from response
         # you could save the three results in a file that then you
         # can open in Excel etc to plot the graphs
-        json_obj = json.loads (resp.read ())
+#        json_obj = json.loads (resp.read ())
         
-        print json_obj['Orig']['time'], json_obj['Relay']['time'], (end_time - start_time)
+#        print json_obj['Orig']['time'], json_obj['Relay']['time'], (end_time - start_time)
 
     # sending a different kind of request. Here we send the autoscale
     # request.
@@ -217,7 +242,14 @@ def main ():
     # You should be including the IP addr of the 2nd VM on the 3rd tier
     # in this autoscale request so the client-facing server now has the
     # knowledge of the 2nd VM in the 3rd tier.
-    
+    #Block dealing with creating second third tier VM
+
+
+
+
+
+
+#hjg;luihf'wjg'e
     print "Sending request for autoscale with RR"
     send_req (conn, "/autoscale?lb=RR")
     
