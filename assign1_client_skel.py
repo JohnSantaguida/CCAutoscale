@@ -84,12 +84,14 @@ def main ():
     FINAL_FLOATING_IP = "129.59.107.47"
     print "floating ip is " + FINAL_FLOATING_IP
     print "Instantiating a connection obj"
+
     #This block creates the 2nd tier VM and the first 3rd tier VM
-    name = 'jspm_tier2'
+    name = 'jspm_tier2*'
     print "creating server: " + name
     create(name, FINAL_FLOATING_IP)
     print name + " created"
-    name = 'jspm_tier3_1'
+
+    name = 'jspm_tier3_1*'
     print "creating server: " + name
     TIER_3_1_IP = create(name)
 
@@ -113,7 +115,11 @@ def main ():
     except:
         print "Exception thrown: ", sys.exc_info()[0]
         raise
-      #Set up tier 2 VM
+
+
+    # Set up tier 2 VM
+    # **** gotta add redislite and redis-collections *********
+
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get -y update' 
     remote_cmd(args)
 
@@ -123,16 +129,16 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo python -m pip install flask'
     remote_cmd(args)
 	
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_relay_server.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/assign1_relay_server.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
     args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_server_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/assign1_server_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/file.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/file.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
 
@@ -163,7 +169,7 @@ def main ():
 
 #    time.sleep(30)#MAYBE NO THERE
 
-    name = 'jspm_tier3_2'
+    name = 'jspm_tier3_2*'
     print "creating server: " + name
     TIER_3_2_IP = create(name)
 
@@ -171,7 +177,7 @@ def main ():
     f2.write(TIER_3_2_IP)
     f2.close()
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/file2.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/file2.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
     print name + " created" 
     print "Tier 3 second IP address: " + str(TIER_3_2_IP) # - hardcode for debugging

@@ -28,6 +28,7 @@ from flask import request
 from flask import json
 
 
+
 # the following instance of the Flask class will act as the
 # WSGI (web server gateway interface) application
 app = Flask (__name__)
@@ -38,13 +39,33 @@ app = Flask (__name__)
 # initialize it to the right connection we want. So for now
 # the connection is established here. Change it to the IP addr of
 # the 3rd tier VM.
-f2 = open('file2.txt')
-IP2 = f2.read()
-conn2 = httplib.HTTPConnection (IP2, "8080")
+
+# import the database for persisting our data
+import redislite
+import redis_collections
+rdb = redis_collections.Dict(redis=redislite.StrictRedis('example.rdb'))
+
+# a queue to manage the servers
+import Queue
+serverqueue = Queue.Queue()
 
 f = open('file.txt')
 IP = f.read()
 conn = httplib.HTTPConnection (IP, "8080")
+serverqueue.put(conn)
+
+f2 = open('file2.txt')
+IP2 = f2.read()
+conn2 = httplib.HTTPConnection (IP2, "8080")
+serverqueue.put(conn2)
+
+# Load balancing related stuff
+Load_balance_enabled = False
+A_server_req_count = 0
+B_server_req_count = 0
+
+
+
 
 
 
@@ -107,8 +128,17 @@ def send_req (conn, req):
 # The following is a top level request. It just returns a welcome message
 @app.route("/")
 def welcome ():
-    print "Welcome to Assignment 1 relay Server!"
-    resp = send_req (conn, request)
+    #print "Welcome to Assignment 1 relay Server! dope"
+    print "extra swag"
+    print "T3 S1: " + IP
+    print "T3 S2: " + IP2
+
+    server = get_server_conn()
+    resp = send_req (server, request)
+
+    print resp
+
+    #return "hello world"
 
     # simply relay the response (note that the read method reads the content)
     return resp.read ()
@@ -125,12 +155,18 @@ def dummy_op ():
     # If you expect to relay a param, that param must be received via
     # the http request. See autoscale method to see how we receive a param
 
+
+
+
+
+
     # start timer so we can time how much is the response time at the
     # relay server
     start_time = time.time ()
 
     # relay the request
-    resp = send_req (conn, request)
+    server = get_server_conn()
+    resp = send_req (server, request)
 
     # stop the timer
     end_time = time.time ()
@@ -141,7 +177,8 @@ def dummy_op ():
     # encode our findings as a json object
     local_dict = {"op" : "dummy_op",
                   "server" : "Assign1_RelayServer",
-                  "time" : end_time - start_time}
+                  "time" : end_time - start_time,
+                  "final server": server.host}
 
     # Now combine the two json objects
     combined_dict = {"Orig" : resp_dict,
@@ -171,11 +208,102 @@ def autoscale ():
     # @@@ Note @@@
     # In this dummy code, I am just relaying this to the 3rd tier but this
     # is not what you should do
+
+
+    # pull out what kind of load balancing we want to do
+    query = request.args
+
+    if 'lb' in query:
+        # there is a request to activate the load balancer
+        strategy = query['lb']
+
+        if strategy == 'RR':
+            rdb['lb_scheme'] = 'RR'
+
+            rdb['balancing_enabled'] = True
+            lb_status = "The server has successfully been set to a Round Robin load-balancing scheme!"
+
+        elif strategy == 'PD':
+            rdb['lb_scheme'] = 'RR'
+            rdb['conn1_max_val'] = 1
+            rdb['conn2_max_val'] = 2
+
+            rdb['balancing_enabled'] = True
+            lb_status = "The server has successfully been set to a Proportional Dispatch load-balancing scheme!"
+
+        else:
+            lb_status = "Invalid load-balancing strategy specified"
+        print lb_status
+        return lb_status
+    else:
+        # there is not a request for load balancing
+        lb_status = 'No load balancing parameter specified'
+        print lb_status
+        return lb_status
+
+
+    IP
+    this.fdsa = Load_balance_enabled
+
+
+
+
+
+
     print "Relay Server: relaying autoscale request %s" % request
     resp = send_req (conn, request)
 
     # simply relay the response (note that the read method reads the content)
     return resp.read ()
+
+
+# A route designed to return simple info about the state of the appp
+@app.route("/status")
+def status ():
+
+    if 'count' in rdb:
+        rdb['count'] += 1
+    else:
+        print 'Current keys: \n' + str(rdb.keys())
+        rdb['count'] = 0
+    return 'The current count is ' + str(rdb['count'])
+
+
+# This function launches a new server
+def launch_server ():
+    f = 9
+
+
+# This function returns a server connection to handle a request
+def get_server_conn ():
+
+        if 'balancing_enabled' not in rdb or rdb['balancing_enabled'] == False:
+            # return the first server regardless
+            return conn
+        elif rdb['lb_scheme'] == 'RR':
+            # pop the first server and put it at the end of the queue
+            server_connection = serverqueue.get()
+            serverqueue.put(server_connection)
+            return server_connection
+        elif rdb['lb_scheme'] == 'PD':
+            # proportional distribution at a rate of 1:2 requests for the servers
+            while true:
+                # traverse the order available server connections
+                if rdb['conn1_count'] > 0:
+                    rdb['conn1_count'] -= 1
+                    print 'Relayed to conn1, new count: ' + str(rdb['conn1_count'])
+                    return conn
+
+                elif rdb['conn2_count'] >0:
+                    rdb['conn2_count'] -= 1
+                    print 'Relayed to conn2, new count: ' + str(rdb['conn2_count'])
+                    return conn2
+
+                else:
+                    # reset the values and start over
+                    rdb['conn1_count'] = rdb['conn1_max_val']
+                    rdb['conn2_count'] = rdb['conn2_max_val']
+
 
 def main ():
     # @@@ NOTE @@@
