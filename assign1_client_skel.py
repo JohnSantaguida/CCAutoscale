@@ -23,7 +23,6 @@ import json
 #server create module 
 from nova_server_create import create
 import subprocess as sp
-	
 
 def remote_cmd(args):
     try:
@@ -85,7 +84,7 @@ def main ():
     FINAL_FLOATING_IP = "129.59.107.47"
     print "floating ip is " + FINAL_FLOATING_IP
     print "Instantiating a connection obj"
-    #This block creates the 2nd tier VM and the first 3rd tier VM
+    '''#This block creates the 2nd tier VM and the first 3rd tier VM
     name = 'jspm_tier2'
     print "creating server: " + name
     create(name, FINAL_FLOATING_IP)
@@ -93,8 +92,13 @@ def main ():
     name = 'jspm_tier3_1'
     print "creating server: " + name
     TIER_3_1_IP = create(name)
-    print name + " created"  
-    print "Tier 3 IP address: " + str(TIER_3_1_IP)
+
+    f = open( 'file.txt', 'w' )
+    f.write(TIER_3_1_IP)
+    f.close()
+
+    print name + " created"'''  
+    print "Tier 3 IP address: " + str("10.10.15.167")#TIER_3_1_IP) - hardcode for debugging
     try:
         # @@@ NOTE @@@
         # if you are trying this locally, use this and by using
@@ -109,8 +113,7 @@ def main ():
     except:
         print "Exception thrown: ", sys.exc_info()[0]
         raise
-    
-#Set up tier 2 VM
+    '''    #Set up tier 2 VM
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo apt-get -y update' 
     remote_cmd(args)
 
@@ -129,8 +132,9 @@ def main ():
     args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_server_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/assign1_client_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/assgn1/proj/CCAutoscale/file.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
+
 
 #Setup tier 3 VM
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo apt-get -y update'
@@ -145,24 +149,23 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo python -m pip install numpy'
     remote_cmd(args)
 
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' sudo apt-get install stress'
+    remote_cmd(args)
+
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
     remote_cmd(args)
 
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/assign1_server_skel.py ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
     remote_cmd(args)
 
-
-    
-#NEED LOOKBUSY
-
-#Start Both Flask Apps
-    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
+'''#NEED LOOKBUSY Start Both Flask Apps
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str("10.10.15.167") + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'#TIER_3_1_IP) - hardcode for debugging
     sp.Popen (args, shell=True)
 
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' env FLASK_APP=assign1_relay_server.py python -m flask run --host=0.0.0.0 --port=8080'
     sp.Popen (args, shell=True)
 
-    time.sleep(30)#MAYBE NO THERE
+#    time.sleep(30)#MAYBE NO THERE
 
 
 

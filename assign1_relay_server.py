@@ -27,6 +27,7 @@ from flask import Flask
 from flask import request
 from flask import json
 
+
 # the following instance of the Flask class will act as the
 # WSGI (web server gateway interface) application
 app = Flask (__name__)
@@ -37,7 +38,9 @@ app = Flask (__name__)
 # initialize it to the right connection we want. So for now
 # the connection is established here. Change it to the IP addr of
 # the 3rd tier VM.
-conn = httplib.HTTPConnection ("127.0.0.1", "8080")
+f = open('file.txt')
+IP = f.read()
+conn = httplib.HTTPConnection (IP, "8080")
 
 # print the response (for debugging purposes only)
 def print_response (resp):
@@ -179,7 +182,7 @@ def main ():
     # Thus, for the assignment, you can make this 8080. You can remove the
     # debug flag.
     print ("Starting the Relay Server")
-    app.run (host="0.0.0.0", port= 8081, debug=True)
+    app.run (host="0.0.0.0", port= 8080)
     
 if __name__ == "__main__":
     sys.exit (main ())

@@ -111,10 +111,11 @@ def autoscale ():
     # http://IPAddr/autoscale?lb=RR or
     # http://IPAddr/autoscale?lb=PD&ratio=1:5
     #
+    else:
     # where RR = round robin (1:1 ratio implied),
     #       PD = proportional dispatch with ratio specified in the next param
 
-    print "Autscale: Received request = %s" % request  
+    print "Autoscale: Received request = %s" % request  
     
     ret_msg = "Welcome to Assignment 1 Server: autoscale! "
     # make sure that the load balancing strategy is mentioned
