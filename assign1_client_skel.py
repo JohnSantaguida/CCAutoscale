@@ -86,12 +86,12 @@ def main ():
     print "Instantiating a connection obj"
 
     #This block creates the 2nd tier VM and the first 3rd tier VM
-    name = 'jspm_tier2*'
+    name = 'jspm_tier2'
     print "creating server: " + name
     create(name, FINAL_FLOATING_IP)
     print name + " created"
 
-    name = 'jspm_tier3_1*'
+    name = 'jspm_tier3_1'
     print "creating server: " + name
     TIER_3_1_IP = create(name)
 
@@ -129,16 +129,16 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo python -m pip install flask'
     remote_cmd(args)
 	
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/assign1_relay_server.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /home/cloud/assgn1/proj/CCAutoscale/assign1_relay_server.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
     args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/assign1_server_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /home/cloud/assgn1/proj/CCAutoscale/assign1_server_skel.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/file.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /home/cloud/assgn1/proj/CCAutoscale/file.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
 
@@ -167,9 +167,8 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' env FLASK_APP=assign1_relay_server.py python -m flask run --host=0.0.0.0 --port=8080'
     sp.Popen (args, shell=True)
 
-#    time.sleep(30)#MAYBE NO THERE
 
-    name = 'jspm_tier3_2*'
+    name = 'jspm_tier3_2'
     print "creating server: " + name
     TIER_3_2_IP = create(name)
 
@@ -177,7 +176,9 @@ def main ():
     f2.write(TIER_3_2_IP)
     f2.close()
 
-    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /media/sf_cloud_computing/assignments/CCAutoscale/file2.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
+    time.sleep(30)#MAYBE NO THERE
+    
+    args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /home/cloud/assgn1/proj/CCAutoscale/file2.txt ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
     print name + " created" 
     print "Tier 3 second IP address: " + str(TIER_3_2_IP) # - hardcode for debugging
