@@ -129,6 +129,12 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo python -m pip install flask'
     remote_cmd(args)
 	
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo python -m pip install redislite'
+    remote_cmd(args)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' sudo python -m pip install redis_collections'
+    remote_cmd(args)
+
     args = 'scp -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem /home/cloud/assgn1/proj/CCAutoscale/assign1_relay_server.py ubuntu@' + str(FINAL_FLOATING_IP) + ':/home/ubuntu/'
     remote_cmd(args)
 
@@ -161,12 +167,6 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/assign1_server_skel.py ubuntu@' + str(TIER_3_1_IP) + ':/home/ubuntu'
     remote_cmd(args)
 
-    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
-    sp.Popen (args, shell=True)
-
-    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' env FLASK_APP=assign1_relay_server.py python -m flask run --host=0.0.0.0 --port=8080'
-    sp.Popen (args, shell=True)
-
 
     name = 'jspm_tier3_2'
     print "creating server: " + name
@@ -198,9 +198,16 @@ def main ():
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' scp -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem /home/ubuntu/assign1_server_skel.py ubuntu@' + str(TIER_3_2_IP) + ':/home/ubuntu'
     remote_cmd(args)
 
+
+
     args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_2_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
     sp.Popen (args, shell=True)
 
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' ssh -o StrictHostKeyChecking=no -i /home/ubuntu/santaguida.pem ubuntu@' + str(TIER_3_1_IP) + ' env FLASK_APP=assign1_server_skel.py python -m flask run --host=0.0.0.0 --port=8080'
+    sp.Popen (args, shell=True)
+
+    args = 'ssh -o StrictHostKeyChecking=no -i ~/.ssh/santaguida.pem ubuntu@' + str(FINAL_FLOATING_IP) + ' env FLASK_APP=assign1_relay_server.py python -m flask run --host=0.0.0.0 --port=8080'
+    sp.Popen (args, shell=True)
 
 
     # @@@ NOTE @@@
