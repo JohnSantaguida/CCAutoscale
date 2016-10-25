@@ -295,7 +295,7 @@ def main ():
 
 
     #Setup tier 3_2 VM
-    config_tier_3_2(tier_3_2_IP)
+    config_tier_3_2(tier_3_2_IP, relay_external_IP)
 
     # launch the flask webserver applications on the servers
     launch_all_flask_servers(relay_external_IP, tier_3_1_IP, tier_3_2_IP)
