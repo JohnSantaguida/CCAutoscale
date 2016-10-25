@@ -29,18 +29,30 @@ from novaclient.v2 import client
 # use the same names for the indexes as those needed by the parameters
 # in the connection request
 def get_nova_creds ():
-    d = {}
-    d['version'] = '2'  # because we will be using the version 2 of the API
-    # The rest of these are obtained from our environment. Don't forget
-    # to do "source cloudclass-rc.sh" or whatever is the name of your rc file
-    #
-    d['region_name'] = os.environ['OS_REGION_NAME']
-    d['auth_url'] = os.environ['OS_AUTH_URL']
-    d['project_id'] = os.environ['OS_TENANT_NAME']
-    d['tenant_id'] = os.environ['OS_TENANT_ID']
-    d['username'] = os.environ['OS_USERNAME']
-    d['api_key'] = os.environ['OS_PASSWORD']
-    return d
+    # d = {}
+    # d['version'] = '2'  # because we will be using the version 2 of the API
+    # # The rest of these are obtained from our environment. Don't forget
+    # # to do "source cloudclass-rc.sh" or whatever is the name of your rc file
+    # #
+    # d['region_name'] = os.environ['OS_REGION_NAME']
+    # d['auth_url'] = os.environ['OS_AUTH_URL']
+    # d['project_id'] = os.environ['OS_TENANT_NAME']
+    # d['tenant_id'] = os.environ['OS_TENANT_ID']
+    # d['username'] = os.environ['OS_USERNAME']
+    # d['api_key'] = os.environ['OS_PASSWORD']
+
+    my_env = {}
+    my_env['version'] = '2'
+    my_env['region_name'] = 'regionOne'
+    my_env['auth_url'] = 'https://keystone.isis.vanderbilt.edu:5000/v2.0'
+    my_env['project_id'] = 'Cloud Class'
+    my_env['tenant_id'] = '7b7cacfc1d3c4973a2666a26cf1a40ff'
+    my_env['username'] = 'mbusap'
+    my_env['api_key'] = 'dh6Xpg6X4vsU'
+
+
+
+    return my_env
 
 # create a connection to the cloud using our credentials
 def create_connection (creds):
@@ -104,7 +116,11 @@ def create_server (myName, nova):
         # we need to retrieve the status of the server from
         # the restful API (it does not get updated dynamically in the
         # server object we have)
-        server = nova.servers.find (name=myName)
+        try:
+            server = nova.servers.find (name=myName)
+        except e:
+            print "NoUniqueMatch exception thrown"
+            continue
 
     print ("Server is now running")
     return server
@@ -136,13 +152,25 @@ def create (name, ip=""):
 
     # create server
     server = create_server (name, nova)
-	
+
     # assign floating IP
     if ip != "":
-	assign_floating_ip (server, ip)
+        assign_floating_ip (server, ip)
     else:
-	return server.networks.get('internal network')[0]
-    
+        return server.networks.get('internal network')[0]
+
+def connect():
+
+    # get our credentials for version 2 of novaclient
+    creds = get_nova_creds()
+
+    # create a connection to the cloud using our credentials
+    nova = create_connection(creds)
+
+    # get server
+    server = ('39611e47-2698-418c-a668-0ecc64831677', nova)
+
+
 # invoke main
 if __name__ == "__main__":
     sys.exit (main ())

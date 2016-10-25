@@ -69,7 +69,10 @@ def dummy_op ():
     # the resp time should shoot up for our client to maybe double what we see.
     #
     # try some large dimensions of the matrix that runs for 5 or so secs
-    arr = np.random.random ((2000,2000))
+
+    arr = np.random.random ((200,200))
+    #arr = np.random.random ((2000,2000))
+
     arr_inv = linalg.inv (arr)
     
     end_time = time.time ()

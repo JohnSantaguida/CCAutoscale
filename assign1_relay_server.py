@@ -224,7 +224,7 @@ def autoscale ():
             lb_status = "The server has successfully been set to a Round Robin load-balancing scheme!"
 
         elif strategy == 'PD':
-            rdb['lb_scheme'] = 'RR'
+            rdb['lb_scheme'] = 'PD'
             rdb['conn1_max_val'] = 1
             rdb['conn2_max_val'] = 2
 
@@ -269,9 +269,6 @@ def status ():
     return 'The current count is ' + str(rdb['count'])
 
 
-# This function launches a new server
-def launch_server ():
-    f = 9
 
 
 # This function returns a server connection to handle a request
